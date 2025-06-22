@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+
+{% block title %}AquaPulse - Smart Algae Bloom Detection and Prediction{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Alert Bar -->
+    <div class="alert-bar bg-white border-bottom py-2">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <div class="status-indicator me-3">
+                            <span class="badge bg-success">ACTIVE</span>
+                        </div>
+                        <small class="text-muted">
+                            Neural Network Status: {{ sensor_data|length }} sensors online | 
+                            AI Analysis: Operational | 
+                            Last Update: <span id="last-update">Loading...</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-success me-2" onclick="toggleVoiceMode()">
+                        <i class="fas fa-microphone"></i> Voice
+                    </button>
+                    <button class="btn btn-sm btn-danger me-2" onclick="showDeleteJunkModal()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="recreateDemoServices()">
+                        <i class="fas fa-plus"></i> Recreate
+                    </button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+    <!-- Main Dashboard Grid - 3 Row Layout -->
+    <div class="dashboard-container">
+        <!-- Row 1: All Metrics -->
+        <div class="dashboard-row metrics-row">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-broadcast-tower text-primary"></i>
+                        <span title="AWS IoT Core" style="font-size:1.2em;cursor:help;">📡</span>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ sensor_data|length }}</div>
+                        <div class="metric-label">Active Sensors</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ (sensor_data | selectattr('status', 'equalto', 'warning') | list | length) }}</div>
+                        <div class="metric-label">High Algae Bloom</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-robot text-success"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ cleanup_data.active_missions }}</div>
+                        <div class="metric-label">Active Mitigation Missions</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-leaf text-success"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">{{ cleanup_data.waste_collected_today }}</div>
+                        <div class="metric-label">Biomass Collected (kg)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Map and AI Analysis -->
+        <div class="dashboard-row map-ai-row">
+            <!-- Map Panel -->
+            <div class="map-panel">
+                <div class="panel-header">
+                    <h5 class="mb-0">Global Algae Bloom Monitoring</h5>
+                    <div class="panel-controls">
+                        <button class="btn btn-sm btn-light" onclick="toggleMapLayer()">
+                            <i class="fas fa-layer-group"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="pollution-map" class="map-container"></div>
+                
+                <!-- Map Legend - Hover Button -->
+                <div class="map-legend-hover">
+                    <div class="legend-trigger">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Legend</span>
+                    </div>
+                    <div class="legend-content">
+                        <div class="legend-item">
+                            <span class="legend-color bg-success"></span>
+                            <small>Low (0-3)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-warning"></span>
+                            <small>Medium (4-7)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-danger"></span>
+                            <small>High (8-10)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <div class="analysis-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-brain text-primary me-2"></i>
+                        AI Neural Network Analysis
+                        <span class="aws-legend-icon" title="AWS Bedrock">🤖</span>
+                    </h6>
+                    <button class="btn btn-sm btn-light" onclick="playAnalysis()">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+                <div class="analysis-content">
+                    <p class="small text-muted mb-2">Real-time insights from Amazon Bedrock:</p>
+                    <div class="ai-response" id="ai-analysis">
+                        {{ ai_analysis }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Prediction Chart and Cleanup Coordination -->
+        <div class="dashboard-row prediction-cleanup-row">
+            <!-- Prediction Charts -->
+            <div class="charts-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Algae Bloom Predictions
+                        <span title="AWS SageMaker" style="font-size:1.2em;cursor:help;">📊</span>
+                    </h6>
+                </div>
+                <div class="chart-container">
+                    <canvas id="prediction-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Cleanup Coordination -->
+            <div class="coordination-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs text-warning me-2"></i>
+                        Autonomous Mitigation Coordination
+                    </h6>
+                </div>
+                <div class="coordination-grid">
+                    <div class="coord-item">
+                        <div class="coord-label">Ocean Drones</div>
+                        <div class="coord-value">{{ cleanup_data.cleanup_robots.ocean_drones if cleanup_data.cleanup_robots and 'ocean_drones' in cleanup_data.cleanup_robots else 'N/A' }}</div>
+                    </div>
+                    <div class="coord-item">
+                        <div class="coord-label">Surface Vessels</div>
+                        <div class="coord-value">{{ cleanup_data.cleanup_robots.surface_vessels if cleanup_data.cleanup_robots and 'surface_vessels' in cleanup_data.cleanup_robots else 'N/A' }}</div>
+                    </div>
+                    <div class="coord-item">
+                        <div class="coord-label">Underwater Units</div>
+                        <div class="coord-value">{{ cleanup_data.cleanup_robots.underwater_units if cleanup_data.cleanup_robots and 'underwater_units' in cleanup_data.cleanup_robots else 'N/A' }}</div>
+                    </div>
+                </div>
+                <div class="next-deployment">
+                    <small class="text-muted">Next Deployment:</small>
+                    <div class="fw-bold">{{ cleanup_data.next_deployment }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Harmful Algae Bloom Operations Center Footer -->
+    <div class="operations-footer">
+        <div class="operations-container">
+            <div class="operations-title">
+                <i class="fas fa-water text-info me-2"></i>
+                Harmful Algae Bloom Operations Center
+            </div>
+            <div class="operations-buttons">
+                <button class="operation-btn" onclick="showHotspotModal()">
+                    <i class="fas fa-fire"></i>
+                    <span>Hotspot Detection</span>
+                </button>
+                <button class="operation-btn" onclick="showMicroplasticsModal()">
+                    <i class="fas fa-tint"></i>
+                    <span>Microalgae Analytics</span>
+                </button>
+                <button class="operation-btn" onclick="showCleanupModal()">
+                    <i class="fas fa-robot"></i>
+                    <span>Mitigation Missions</span>
+                </button>
+                <button class="operation-btn" onclick="showCitizenModal()">
+                    <i class="fas fa-users"></i>
+                    <span>Citizen Reports</span>
+                </button>
+                <button class="operation-btn" onclick="showAIAlertsModal()">
+                    <i class="fas fa-bell"></i>
+                    <span>AI Alerts</span>
+                </button>
+                <button class="operation-btn" onclick="showDataLakeModal()">
+                    <i class="fas fa-database"></i>
+                    <span>Data Lake Insights</span>
+                </button>
+                <button class="operation-btn" onclick="showLifecycleModal()">
+                    <i class="fas fa-recycle"></i>
+                    <span>Algae Bloom Lifecycle</span>
+                </button>
+                <button class="operation-btn" onclick="showImpactModal()">
+                    <i class="fas fa-globe"></i>
+                    <span>Global Impact</span>
+                </button>
+                <button class="operation-btn" onclick="showEngageModal()">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>Engage</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab-container">
+        <button class="fab" data-bs-toggle="modal" data-bs-target="#reportModal">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="fab-label">Report Pollution</div>
+    </div>
+
+    <!-- Modals for each business concept -->
+    <div class="modal fade" id="hotspotModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Hotspot Detection <span class="badge bg-primary ms-2"><i class="fas fa-broadcast-tower"></i> IoT</span> <span class="badge bg-warning ms-1"><i class="fas fa-bolt"></i> Lambda</span> <span class="badge bg-info ms-1"><i class="fas fa-brain"></i> Bedrock</span> <span class="badge bg-success ms-1"><i class="fas fa-database"></i> S3</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row mb-3"><div class="col-md-8"><div id="hotspot-map" style="height:350px;"></div></div><div class="col-md-4"><div class="card mb-2"><div class="card-body"><h6 class="card-title"><i class="fas fa-bolt text-warning me-2"></i>Lambda Status</h6><div id="lambda-status">Loading...</div></div></div><div class="card"><div class="card-body"><h6 class="card-title"><i class="fas fa-brain text-info me-2"></i>AI Detected Hotspots</h6><div id="ai-hotspots">Loading...</div></div></div></div></div><div class="mt-3 d-flex justify-content-end"><a href="#" id="download-hotspot-data" class="btn btn-success"><i class="fas fa-download me-1"></i>Download Hotspot Data (S3)</a></div></div></div></div></div>
+    <div class="modal fade" id="microplasticsModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Microalgae Analytics <span class="badge bg-success ms-2"><i class="fas fa-robot"></i> SageMaker</span> <span class="badge bg-primary ms-1"><i class="fas fa-database"></i> S3</span> <span class="badge bg-warning ms-1"><i class="fas fa-bolt"></i> Lambda</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row mb-3"><div class="col-md-8"><canvas id="microplastics-chart" height="300"></canvas></div><div class="col-md-4"><div class="card mb-2"><div class="card-body"><h6 class="card-title"><i class="fas fa-database text-primary me-2"></i>Data Explorer (S3)</h6><div id="microplastics-data-explorer">Loading...</div></div></div><button class="btn btn-warning w-100 mb-2" id="run-deep-analysis"><i class="fas fa-bolt me-1"></i>Run Deep Analysis (Lambda/SageMaker)</button><a href="#" id="download-microplastics-report" class="btn btn-success w-100"><i class="fas fa-download me-1"></i>Download Analytics Report (S3)</a></div></div></div></div></div></div>
+    <div class="modal fade" id="cleanupModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Mitigation Missions <span class="badge bg-primary ms-2"><i class="fas fa-broadcast-tower"></i> IoT</span> <span class="badge bg-warning ms-1"><i class="fas fa-bolt"></i> Lambda</span> <span class="badge bg-info ms-1"><i class="fas fa-network-wired"></i> Agent</span> <span class="badge bg-success ms-1"><i class="fas fa-database"></i> S3</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row mb-3"><div class="col-md-8"><div id="cleanup-mission-dashboard">Loading...</div></div><div class="col-md-4"><button class="btn btn-info w-100 mb-2" id="automate-mission"><i class="fas fa-robot me-1"></i>Automate Mission (Lambda/Agent)</button><a href="#" id="download-mission-logs" class="btn btn-success w-100"><i class="fas fa-download me-1"></i>Download Mission Logs (S3)</a><div class="card mt-2"><div class="card-body"><h6 class="card-title"><i class="fas fa-broadcast-tower text-primary me-2"></i>Robot Status (IoT)</h6><div id="robot-status">Loading...</div></div></div></div></div></div></div></div></div>
+    <div class="modal fade" id="citizenModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        Citizen Reports & Engagement
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="citizenTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+                                <i class="fas fa-clipboard-list me-2"></i>Reports
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="voice-tab" data-bs-toggle="tab" data-bs-target="#voice" type="button" role="tab">
+                                <i class="fas fa-microphone me-2"></i>Voice Reports
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat" type="button" role="tab">
+                                <i class="fas fa-comments me-2"></i>Chat Support
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="engagement-tab" data-bs-toggle="tab" data-bs-target="#engagement" type="button" role="tab">
+                                <i class="fas fa-chart-line me-2"></i>Engagement
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns" type="button" role="tab">
+                                <i class="fas fa-bullhorn me-2"></i>Campaigns
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="citizenTabContent">
+                        <!-- Reports Tab -->
+                        <div class="tab-pane fade show active" id="reports" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="text-primary mb-3">Recent Citizen Reports</h6>
+                                    <div id="citizen-reports-list" class="list-group">
+                                        <!-- Reports will be loaded here -->
+                        </div>
+                        </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary mb-3">Report Statistics</h6>
+                                    <div id="citizen-reports-stats">
+                                        <!-- Statistics will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Voice Reports Tab -->
+                        <div class="tab-pane fade" id="voice" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">Voice Report Recording</h6>
+                                    <span title="AWS Transcribe" style="font-size:1.2em;cursor:help;">🎤</span>
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <div class="voice-recorder mb-3">
+                                                <button class="btn btn-primary btn-lg rounded-circle" id="voice-record-btn">
+                                                    <i class="fas fa-microphone"></i>
+                                                </button>
+                                                <div class="mt-2">
+                                                    <small class="text-muted" id="voice-status">Click to start recording</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Location (optional)</label>
+                                                <input type="text" class="form-control" id="voice-location" placeholder="Enter location">
+                                            </div>
+                                            <div class="form-group mt-3">
+                                                <label class="form-label">Reporter Info (optional)</label>
+                                                <input type="text" class="form-control" id="voice-reporter" placeholder="Your name or ID">
+                                            </div>
+                                            <button class="btn btn-success mt-3" id="submit-voice-report" disabled>
+                                                <i class="fas fa-paper-plane me-2"></i>Submit Voice Report
+                                            </button>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">Voice Report Analysis</h6>
+                                    <div id="voice-analysis-result" class="card">
+                                        <div class="card-body">
+                                            <div class="text-center text-muted">
+                                                <i class="fas fa-microphone-slash fa-3x mb-3"></i>
+                                                <p>Record a voice report to see analysis</p>
+                            </div>
+                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Support Tab -->
+                        <div class="tab-pane fade" id="chat" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="text-primary mb-3">Citizen Support Chat</h6>
+                                    <span title="AWS Lex" style="font-size:1.2em;cursor:help;">💬</span>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div id="chat-messages" class="chat-container mb-3" style="height: 300px; overflow-y: auto;">
+                                                <div class="chat-message bot-message">
+                                                    <div class="message-content">
+                                                        <i class="fas fa-robot text-primary me-2"></i>
+                                                        Hello! I'm here to help you report pollution or get information about environmental concerns. How can I assist you today?
+                                                    </div>
+                                                    <small class="text-muted">Just now</small>
+                                                </div>
+                                            </div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="chat-input" placeholder="Type your message...">
+                                                <button class="btn btn-primary" id="send-chat-btn">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary mb-3">Quick Actions</h6>
+                                    <div class="list-group">
+                                        <button class="list-group-item list-group-item-action" onclick="sendQuickMessage('I found plastic waste on the beach')">
+                                            <i class="fas fa-umbrella-beach me-2"></i>Beach Pollution
+                                        </button>
+                                        <button class="list-group-item list-group-item-action" onclick="sendQuickMessage('There is plastic in the river')">
+                                            <i class="fas fa-water me-2"></i>River Pollution
+                                        </button>
+                                        <button class="list-group-item list-group-item-action" onclick="sendQuickMessage('I need information about recycling')">
+                                            <i class="fas fa-recycle me-2"></i>Recycling Info
+                                        </button>
+                                        <button class="list-group-item list-group-item-action" onclick="sendQuickMessage('How can I volunteer for cleanup?')">
+                                            <i class="fas fa-hands-helping me-2"></i>Volunteer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Engagement Tab -->
+                        <div class="tab-pane fade" id="engagement" role="tabpanel">
+                            <div class="row">
+                            <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">Engagement Metrics</h6>
+                                    <div id="engagement-metrics">
+                                        <!-- Metrics will be loaded here -->
+                                    </div>
+                            </div>
+                            <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">Recent Activity</h6>
+                                    <div id="engagement-activity">
+                                        <!-- Activity will be loaded here -->
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+
+                        <!-- Campaigns Tab -->
+                        <div class="tab-pane fade" id="campaigns" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="text-primary mb-3">Active Campaigns</h6>
+                                    <div id="active-campaigns">
+                                        <!-- Campaigns will be loaded here -->
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary mb-3">Create New Campaign</h6>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Campaign Type</label>
+                                                <select class="form-select" id="campaign-type">
+                                                    <option value="awareness">Awareness Campaign</option>
+                                                    <option value="cleanup">Cleanup Initiative</option>
+                                                    <option value="reporting">Enhanced Reporting</option>
+                                                </select>
+                                            </div>
+                                            <button class="btn btn-primary w-100" onclick="createEngagementCampaign()">
+                                                <i class="fas fa-plus me-2"></i>Create Campaign
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="refreshCitizenData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="aiAlertsModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">AI Alerts & Recommendations</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"></div></div></div></div>
+    <div class="modal fade" id="dataLakeModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Data Lake Insights</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"></div></div></div></div>
+    <div class="modal fade" id="lifecycleModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Algae Bloom Lifecycle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"></div></div></div></div>
+    <div class="modal fade" id="impactModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Global Impact</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"></div></div></div></div>
+    <div class="modal fade" id="engageModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Engage</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"></div></div></div></div>
+    <div class="modal fade" id="deleteJunkModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trash text-danger me-2"></i>
+                        Delete AWS Services
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This will permanently delete all test/demo AWS services!
+                    </div>
+                    <p>The following services will be deleted:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-satellite-dish text-primary me-2"></i>
+                            IoT Things, Certificates & Policies (containing 'test', 'demo', 'ui-test', 'pollution')
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-code text-success me-2"></i>
+                            Lambda Functions (containing 'test', 'demo', 'ui-test', 'pollution')
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-database text-info me-2"></i>
+                            S3 Buckets & Objects (containing 'test', 'demo', 'ui-test', 'pollution')
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-comments text-warning me-2"></i>
+                            Lex Bots (simulated deletion)
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-microphone-alt text-danger me-2"></i>
+                            Transcribe Jobs (containing 'test', 'demo', 'ui-test', 'pollution')
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-brain text-secondary me-2"></i>
+                            SageMaker Notebooks (containing 'test', 'demo', 'ui-test', 'pollution')
+                        </li>
+                    </ul>
+                    <p class="text-muted mt-3">
+                        <small>This action cannot be undone. Use the "Recreate" button to restore essential services.</small>
+                    </p>
+                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteJunkServices()">
+                        <i class="fas fa-trash me-1"></i> Delete All Services
+                    </button>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Interaction Panel -->
+    <div class="voice-panel" id="voice-panel" style="display: none;">
+        <div class="voice-controls">
+            <button class="btn btn-primary btn-lg rounded-circle" id="voice-btn">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <div class="voice-status" id="voice-status">Click to start voice interaction</div>
+        </div>
+    </div>
+
+    <!-- Sensor Details Modal -->
+    <div class="modal fade" id="sensorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sensorModalTitle">Sensor Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="sensorModalBody">
+                    <!-- Sensor details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Agent Optimization Modal -->
+    <div class="modal fade" id="aiAgentModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Multi-Agent AI Optimization System
+                        <span title="AWS Bedrock Agent" style="font-size:1.2em;cursor:help;">🤖</span>
+                        <span title="AWS Lambda" style="font-size:1.2em;cursor:help;">⚡</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- BEFORE/AFTER METRICS ROW -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-warning mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title text-warning"><i class="fas fa-arrow-down me-2"></i>Before Optimization</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Efficiency:</strong> <span class="text-danger">62%</span></li>
+                                        <li><strong>Response Time:</strong> <span class="text-danger">8.2s</span></li>
+                                        <li><strong>Resource Usage:</strong> <span class="text-danger">78%</span></li>
+                                        <li><strong>Coverage:</strong> <span class="text-danger">68%</span></li>
+                                        <li><strong>Prediction Accuracy:</strong> <span class="text-danger">81%</span></li>
+                                        <li><strong>Autonomous Units Active:</strong> <span class="text-danger">7</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success"><i class="fas fa-arrow-up me-2"></i>After Optimization</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Efficiency:</strong> <span class="text-success">96%</span> <i class="fas fa-arrow-up text-success"></i></li>
+                                        <li><strong>Response Time:</strong> <span class="text-success">2.1s</span> <i class="fas fa-arrow-down text-success"></i></li>
+                                        <li><strong>Resource Usage:</strong> <span class="text-success">54%</span> <i class="fas fa-arrow-down text-success"></i></li>
+                                        <li><strong>Coverage:</strong> <span class="text-success">99%</span> <i class="fas fa-arrow-up text-success"></i></li>
+                                        <li><strong>Prediction Accuracy:</strong> <span class="text-success">97%</span> <i class="fas fa-arrow-up text-success"></i></li>
+                                        <li><strong>Autonomous Units Active:</strong> <span class="text-success">12</span> <i class="fas fa-arrow-up text-success"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END BEFORE/AFTER METRICS ROW -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Agent Coordination Network</h6>
+                            <div id="agent-network" class="mb-3">
+                                <div class="agent-node active" data-agent="detection">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Detection Agent</span>
+                                    <div class="agent-status">Scanning: 5 hotspots</div>
+                                </div>
+                                <div class="agent-node active" data-agent="prediction">
+                                    <i class="fas fa-brain"></i>
+                                    <span>Prediction Agent</span>
+                                    <div class="agent-status">ML Models: 3 active</div>
+                                </div>
+                                <div class="agent-node active" data-agent="cleanup">
+                                    <i class="fas fa-robot"></i>
+                                    <span>Cleanup Agent</span>
+                                    <div class="agent-status">Dispatching: 8 units</div>
+                                </div>
+                                <div class="agent-node active" data-agent="coordination">
+                                    <i class="fas fa-network-wired"></i>
+                                    <span>Coordination Hub</span>
+                                    <div class="agent-status">Managing: 12 agents</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Real-time Optimization</h6>
+                            <div id="optimization-log" class="optimization-console">
+                                <div class="log-entry">
+                                    <span class="timestamp">20:27:15</span>
+                                    <span class="level success">SUCCESS</span>
+                                    <span>Multi-agent coordination initiated</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="timestamp">20:27:16</span>
+                                    <span class="level info">INFO</span>
+                                    <span>Detection agents analyzing satellite imagery</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="timestamp">20:27:17</span>
+                                    <span class="level warning">WARNING</span>
+                                    <span>High pollution detected in Mediterranean Sea</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="timestamp">20:27:18</span>
+                                    <span class="level success">SUCCESS</span>
+                                    <span>Cleanup units dispatched to hotspot</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- DETAILED OPTIMIZATION METRICS TABLE -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-2">Optimization Metrics Overview</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th>Before</th>
+                                            <th>After</th>
+                                            <th>Change</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Efficiency</td><td>62%</td><td class="text-success fw-bold">96%</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +34%</span></td></tr>
+                                        <tr><td>Response Time</td><td>8.2s</td><td class="text-success fw-bold">2.1s</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -6.1s</span></td></tr>
+                                        <tr><td>Resource Usage</td><td>78%</td><td class="text-success fw-bold">54%</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -24%</span></td></tr>
+                                        <tr><td>Coverage</td><td>68%</td><td class="text-success fw-bold">99%</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +31%</span></td></tr>
+                                        <tr><td>Prediction Accuracy</td><td>81%</td><td class="text-success fw-bold">97%</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +16%</span></td></tr>
+                                        <tr><td>Autonomous Units Active</td><td>7</td><td class="text-success fw-bold">12</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +5</span></td></tr>
+                                        <tr><td>Alert Response Rate</td><td>72%</td><td class="text-success fw-bold">98%</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +26%</span></td></tr>
+                                        <tr><td>Energy Consumption</td><td>100 kWh</td><td class="text-success fw-bold">68 kWh</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -32%</span></td></tr>
+                                        <tr><td>Data Throughput</td><td>1.2 MB/s</td><td class="text-success fw-bold">2.8 MB/s</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +1.6 MB/s</span></td></tr>
+                                        <tr><td>Downtime</td><td>2.4%</td><td class="text-success fw-bold">0.2%</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -2.2%</span></td></tr>
+                                        <tr><td>Incident Resolution Time</td><td>4.5h</td><td class="text-success fw-bold">1.1h</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -3.4h</span></td></tr>
+                                        <tr><td>False Positive Rate</td><td>9.8%</td><td class="text-success fw-bold">2.1%</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -7.7%</span></td></tr>
+                                        <tr><td>Network Latency</td><td>320ms</td><td class="text-success fw-bold">110ms</td><td><span class="text-success"><i class="fas fa-arrow-down"></i> -210ms</span></td></tr>
+                                        <tr><td>Collaboration Events</td><td>3/day</td><td class="text-success fw-bold">9/day</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +6/day</span></td></tr>
+                                        <tr><td>AI Model Retrain Frequency</td><td>1/mo</td><td class="text-success fw-bold">1/wk</td><td><span class="text-success"><i class="fas fa-arrow-up"></i> +3/mo</span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END DETAILED OPTIMIZATION METRICS TABLE -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Optimization Animation Overlay -->
+    <div class="modal fade" id="aiOptimizationOverlay" tabindex="-1" style="background:rgba(255,255,255,0.95);z-index:2000;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body text-center">
+                    <div id="ai-optimization-animation" style="font-size:2em;">
+                        <div class="mb-3">
+                            <span class="spinner-border text-primary" style="width:3rem;height:3rem;"></span>
+                        </div>
+                        <div id="ai-optimization-text" class="fw-bold">Optimizing using AWS Bedrock...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lex Chat Modal -->
+    <div class="modal fade" id="lexChatModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-comments text-info me-2"></i>
+                        Lex Chatbot - Pollution Reporting Assistant
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                <div class="modal-body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot-message">
+                                <div class="message-content">
+                                    <i class="fas fa-robot text-info me-2"></i>
+                                    Hello! I'm your AI assistant for pollution reporting. How can I help you today?
+                                </div>
+                                <div class="message-time">Just now</div>
+                                        </div>
+                                    </div>
+                        <div class="chat-input-container">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="chatInput" placeholder="Type your message here..." onkeypress="handleChatKeyPress(event)">
+                                <button class="btn btn-primary" onclick="sendChatMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="startVoiceInput()">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                </div>
+                                        </div>
+                                    </div>
+                    <div class="chat-suggestions mt-3">
+                        <h6 class="text-muted">Quick Actions:</h6>
+                        <div class="suggestion-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="sendQuickMessage('Report pollution in Mediterranean Sea')">
+                                Report Pollution
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="sendQuickMessage('What are the current pollution levels?')">
+                                Check Levels
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="sendQuickMessage('How can I help reduce plastic pollution?')">
+                                Get Help
+                            </button>
+                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+    <!-- Citizen Reporting Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-camera text-primary me-2"></i>
+                        Report Algae Bloom
+                        <span class="aws-legend-icon" title="AWS Rekognition">🖼️</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('submit_report') }}" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" required>
+                            <input type="hidden" name="lat" id="report-lat">
+                            <input type="hidden" name="lng" id="report-lng">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Algae Bloom Level</label>
+                                <select class="form-select" name="pollution_level" required>
+                                    <option value="">Select level</option>
+                                    <option value="1">1 - Very Low</option>
+                                    <option value="3">3 - Low</option>
+                                    <option value="5">5 - Medium</option>
+                                    <option value="7">7 - High</option>
+                                    <option value="9">9 - Very High</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Severity</label>
+                                <select class="form-select" name="severity" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Your Name (Optional)</label>
+                                <input type="text" class="form-control" name="reporter_name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Contact (Optional)</label>
+                                <input type="email" class="form-control" name="contact">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Upload Photo (Optional)</label>
+                            <input type="file" class="form-control" name="image" accept="image/*" onchange="analyzeUploadedImage(this)">
+                            <div id="image-analysis-result" class="mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Report</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="sensor-data">{{ sensor_data | tojson }}</script>
+<script type="application/json" id="prediction-data">{{ predictions | tojson }}</script>
+<script type="application/json" id="cleanup-data">{{ cleanup_data | tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modals.js') }}"></script>
+{% endblock %}
