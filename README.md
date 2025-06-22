@@ -1,4 +1,4 @@
-```markdown
+
 # 🌊 AquaPulse: Smart Algae Bloom Detection and Prediction 🌱
 
 ## Overview
@@ -262,4 +262,3 @@ Moving forward, we plan to enhance AquaPulse by:
 - Increasing community engagement initiatives to foster participation. 🤗
 - Partnering with local governments and organizations to deploy AquaPulse in additional regions. 🏙️
 - Exploring new features that address other environmental challenges, such as water quality monitoring and pollution detection. 🌊
-```
