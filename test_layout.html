@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test - GPPNN Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="static/css/dashboard.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+        .test-content { 
+            background: #f1f5f9; 
+            padding: 20px; 
+            text-align: center; 
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Alert Bar -->
+    <div class="alert-bar bg-white border-bottom py-2">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <div class="status-indicator me-3">
+                            <span class="badge bg-success">ACTIVE</span>
+                        </div>
+                        <small class="text-muted">
+                            Neural Network Status: 25 sensors online | 
+                            AI Analysis: Operational | 
+                            Last Update: <span id="last-update">Just now</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-success me-2">
+                        <i class="fas fa-microphone"></i> Voice
+                    </button>
+                    <button class="btn btn-sm btn-danger me-2">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-sm btn-success">
+                        <i class="fas fa-plus"></i> Recreate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid - 3 Row Layout -->
+    <div class="dashboard-container">
+        <!-- Row 1: All Metrics -->
+        <div class="dashboard-row metrics-row">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-broadcast-tower text-primary"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">25</div>
+                        <div class="metric-label">Active Sensors</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">8</div>
+                        <div class="metric-label">High Pollution</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-robot text-success"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">12</div>
+                        <div class="metric-label">Active Missions</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-trash text-danger"></i>
+                    </div>
+                    <div class="metric-data">
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">Waste Collected (kg)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Map and AI Analysis -->
+        <div class="dashboard-row map-ai-row">
+            <!-- Map Panel -->
+            <div class="map-panel">
+                <div class="panel-header">
+                    <h5 class="mb-0">Global Pollution Monitoring</h5>
+                    <div class="panel-controls">
+                        <button class="btn btn-sm btn-light">
+                            <i class="fas fa-layer-group"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="map-container">
+                    <div class="test-content">
+                        <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                        <br>Interactive Global Map
+                        <br><small>Real-time pollution monitoring</small>
+                    </div>
+                </div>
+                
+                <!-- Map Legend - Hover Button -->
+                <div class="map-legend-hover">
+                    <div class="legend-trigger">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Legend</span>
+                    </div>
+                    <div class="legend-content">
+                        <div class="legend-item">
+                            <span class="legend-color bg-success"></span>
+                            <small>Low (0-3)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-warning"></span>
+                            <small>Medium (4-7)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-danger"></span>
+                            <small>High (8-10)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <div class="analysis-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-brain text-primary me-2"></i>
+                        AI Neural Network Analysis
+                    </h6>
+                    <button class="btn btn-sm btn-light">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+                <div class="analysis-content">
+                    <p class="small text-muted mb-2">Real-time insights from Amazon Bedrock:</p>
+                    <div class="ai-response">
+                        <strong>🌊 Ocean Alert:</strong> High microplastic concentration detected in Mediterranean Sea.<br>
+                        <strong>🤖 AI Response:</strong> Autonomous cleanup units dispatched to coordinates 35.2°N, 18.5°E.<br>
+                        <strong>📊 Trend:</strong> 23% reduction in surface pollution over last 30 days.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Prediction Chart and Cleanup Coordination -->
+        <div class="dashboard-row prediction-cleanup-row">
+            <!-- Prediction Charts -->
+            <div class="charts-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Pollution Predictions
+                    </h6>
+                </div>
+                <div class="chart-container">
+                    <div class="test-content">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <br>Prediction Chart
+                        <br><small>AI-powered forecasting</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cleanup Coordination -->
+            <div class="coordination-panel">
+                <div class="panel-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs text-warning me-2"></i>
+                        Autonomous Cleanup Coordination
+                    </h6>
+                </div>
+                <div class="coordination-grid">
+                    <div class="coord-item">
+                        <div class="coord-label">Ocean Drones</div>
+                        <div class="coord-value">8</div>
+                    </div>
+                    <div class="coord-item">
+                        <div class="coord-label">Surface Vessels</div>
+                        <div class="coord-value">12</div>
+                    </div>
+                    <div class="coord-item">
+                        <div class="coord-label">Underwater Units</div>
+                        <div class="coord-value">5</div>
+                    </div>
+                </div>
+                <div class="next-deployment">
+                    <small class="text-muted">Next Deployment:</small>
+                    <div class="fw-bold">Pacific Garbage Patch - 2 hours</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plastic Pollution Operations Center Footer -->
+    <div class="operations-footer">
+        <div class="operations-container">
+            <div class="operations-title">
+                <i class="fas fa-recycle text-info me-2"></i>
+                Plastic Pollution Operations Center
+            </div>
+            <div class="operations-buttons">
+                <button class="operation-btn">
+                    <i class="fas fa-fire"></i>
+                    <span>Hotspot Detection</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-tint"></i>
+                    <span>Microplastics Analytics</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-robot"></i>
+                    <span>Cleanup Missions</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-users"></i>
+                    <span>Citizen Reports</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-bell"></i>
+                    <span>AI Alerts</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-database"></i>
+                    <span>Data Lake Insights</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-recycle"></i>
+                    <span>Plastic Lifecycle</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-globe"></i>
+                    <span>Global Impact</span>
+                </button>
+                <button class="operation-btn">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>Engage</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab-container">
+        <button class="fab">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="fab-label">Report Pollution</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AWS Service Mapping for Algae Bloom Operations Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; margin: 0; padding: 2rem; }
+        h2 { color: #2563eb; margin-bottom: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        th, td { padding: 0.75rem 1rem; text-align: center; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f1f5f9; color: #1e293b; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        .aws-icon { font-size: 1.3em; vertical-align: middle; margin-right: 0.3em; }
+        .check { color: #10b981; font-size: 1.2em; }
+        .empty { color: #d1d5db; }
+        .modal-name { text-align: left; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <h2>AWS Service Mapping for Algae Bloom Operations Center</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Modal/Screen</th>
+                <th><span class="aws-icon"><i class="fas fa-broadcast-tower" title="IoT"></i></span>IoT</th>
+                <th><span class="aws-icon"><i class="fas fa-bolt" title="Lambda"></i></span>Lambda</th>
+                <th><span class="aws-icon"><i class="fas fa-brain" title="Bedrock"></i></span>Bedrock</th>
+                <th><span class="aws-icon"><i class="fas fa-database" title="S3"></i></span>S3</th>
+                <th><span class="aws-icon"><i class="fas fa-robot" title="SageMaker"></i></span>SageMaker</th>
+                <th><span class="aws-icon"><i class="fas fa-comments" title="Lex"></i></span>Lex</th>
+                <th><span class="aws-icon"><i class="fas fa-microphone" title="Transcribe"></i></span>Transcribe</th>
+                <th><span class="aws-icon"><i class="fas fa-image" title="Rekognition"></i></span>Rekognition</th>
+                <th><span class="aws-icon"><i class="fas fa-bell" title="SNS"></i></span>SNS</th>
+                <th><span class="aws-icon"><i class="fas fa-users-cog" title="Agent"></i></span>Agent</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="modal-name">Hotspot Detection</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Microplastics Analytics</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Cleanup Missions</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+            </tr>
+            <tr>
+                <td class="modal-name">Citizen Reports</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">AI Alerts</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Data Lake Insights</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Plastic Lifecycle</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Global Impact</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+            </tr>
+            <tr>
+                <td class="modal-name">Engage</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+                <td class="empty">—</td>
+                <td><span class="check">✅</span></td>
+                <td class="empty">—</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html> 
