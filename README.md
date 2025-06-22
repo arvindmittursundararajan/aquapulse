@@ -24,6 +24,39 @@ AquaPulse leverages AWS generative AI, IoT, and cloud services to deliver real-t
 ![Screenshot 4](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_57_10.png)
 ![Screenshot 5](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_57_32.png)
 
+
+## System Architecture
+
+![AquaPulse Architecture](https://github.com/arvindmittursundararajan/aquapulse/blob/main/screenshots/arcc.png)
+
+The AquaPulse system architecture is a comprehensive, cloud-native solution designed to monitor and respond to harmful algae blooms (HABs) by integrating IoT, AI, and cloud services across multiple layers:
+
+### Edge Layer
+This layer consists of distributed IoT sensors deployed in water bodies that continuously collect environmental data relevant to algae bloom detection. Connectivity is provided by telecom partners such as AT&T, Rogers, and Deutsche Telekom, ensuring reliable and secure data transmission from remote locations.
+
+### Cloud Ingestion & Processing Layer
+Data from the edge sensors is ingested into the cloud via AWS IoT Core, which manages secure device communication. AWS Lambda functions process and transform the incoming data streams, preparing them for advanced analytics.
+
+### AI Analytics Layer
+This core intelligence layer leverages multiple AWS services to perform sophisticated analysis and prediction:
+- **Satellite Imagery Processing:** NVIDIA-powered pipelines analyze multispectral satellite images to detect bloom patterns.
+- **Citizen Image Analysis:** Amazon Rekognition processes photos submitted by citizens for visual bloom identification.
+- **Historical Dataset Processing:** Amazon Bedrock integrates legacy datasets to enrich contextual understanding.
+- **Machine Learning Modeling:** Amazon SageMaker trains and deploys predictive models for bloom forecasting and severity estimation.
+
+### Application & Engagement Layer
+This user-facing layer delivers actionable insights and engagement tools:
+- **Citizen Engagement:** Conversational AI interfaces powered by Amazon Lex, Transcribe, and Polly enable reporting and alerts.
+- **Dashboard & Visualization:** Real-time maps, analytics, and visualizations are provided for municipal authorities and researchers.
+- **Notifications & Alerts:** Amazon SNS delivers timely notifications to stakeholders.
+
+### Stakeholders
+The architecture integrates diverse stakeholders including enterprises, local communities, and weather/climate data providers, fostering collaboration and informed decision-making.
+
+---
+
+This architecture exemplifies a robust, scalable, and intelligent system that harnesses IoT, computer vision, and machine learning to empower communities and authorities in effectively monitoring and mitigating harmful algae blooms.
+
 ## AWS Services Utilized ☁️
 
 ### **Core Generative AI & ML**
