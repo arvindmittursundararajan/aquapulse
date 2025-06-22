@@ -4,6 +4,7 @@
 ## Overview
 AquaPulse is a next-generation, cloud-native solution for real-time harmful algae bloom (HAB) monitoring, analytics, and citizen engagement. It leverages AWS generative AI, IoT, and advanced cloud services to deliver actionable insights, automate response, and empower communities and authorities to drive measurable environmental impact. 🌍💡
 # **We originally started with Microplastic detection and then switched to Algae Bloom monitoring SINCE THAT FELT MORE NOVEL. SO SOME PART OF CODE MIGHT STILL HAVE PLASTIC RELATED SERVICES/DATA/API'S**
+[![Watch AquaPulse: Smart Algae Bloom Detection and Prediction](https://img.youtube.com/vi/V_ao2aE5AGI/maxresdefault.jpg)](https://www.youtube.com/watch?v=V_ao2aE5AGI)
 
 Check out the live demo of AquaPulse here:  
 [https://aquapulse1.vercel.app/](https://aquapulse1.vercel.app/)  
