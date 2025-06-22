@@ -5,6 +5,15 @@
 AquaPulse is a next-generation, cloud-native solution for real-time harmful algae bloom (HAB) monitoring, analytics, and citizen engagement. It leverages AWS generative AI, IoT, and advanced cloud services to deliver actionable insights, automate response, and empower communities and authorities to drive measurable environmental impact.
 
 ---
+![Screenshot 1](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/Screenshot%202025-06-22%20210120.png)
+
+![Screenshot 2](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_56_39.png)
+
+![Screenshot 3](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_56_59.png)
+
+![Screenshot 4](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_57_10.png)
+
+![Screenshot 5](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/screencapture-localhost-5000-2025-06-22-20_57_32.png)
 
 ## AWS Services Utilized
 
