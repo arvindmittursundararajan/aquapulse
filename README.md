@@ -1,5 +1,5 @@
-
 # 🌊 AquaPulse: Smart Algae Bloom Detection and Prediction 🌱
+# This is built by a **SINGLE person**, who has stayed on the river side during my childhood. Seeing a lot of algae on the Kauvery River in India motivated me to do this initiative. The technology wasnt there then. It is possible today thanks to 5G + IoT + AWS
 
 ## Overview
 AquaPulse is a next-generation, cloud-native solution for real-time harmful algae bloom (HAB) monitoring, analytics, and citizen engagement. It leverages AWS generative AI, IoT, and advanced cloud services to deliver actionable insights, automate response, and empower communities and authorities to drive measurable environmental impact. 🌍💡
@@ -14,6 +14,58 @@ Watch the full introduction and deep dive video here:
 
 ---
 
+## Inspiration
+AquaPulse was inspired by the increasing threat of harmful algae blooms (HABs) to aquatic ecosystems and public health. Observing the detrimental effects of pollution and climate change on water bodies, we aimed to create a solution that empowers communities to monitor and respond effectively to these environmental challenges.
+
+## What it Does
+AquaPulse is a cloud-native platform designed for real-time monitoring, prediction, and response to harmful algae blooms. It utilizes advanced AI, IoT sensors, and community engagement tools to provide actionable insights, enabling authorities and citizens to take timely actions to protect water quality and public health.
+
+## How We Built It
+We built AquaPulse using a combination of AWS services:
+- **Amazon Bedrock** for generative AI and anomaly detection.
+- **Amazon SageMaker** for machine learning analytics and forecasting.
+- **AWS IoT Core** for real-time data ingestion from IoT devices.
+- **AWS Lambda** for event-driven processing.
+- **Amazon S3** as a data lake for storing sensor data and analytics outputs.
+- **Amazon Lex** for conversational AI and citizen engagement.
+- **MongoDB** for geospatial data and processing IoT data realtime
+
+| Modal/Screen           | IoT | Lambda | Bedrock | S3 | SageMaker | Lex | Transcribe | Rekognition | Polly | SNS | Agent |
+|------------------------|-----|--------|---------|----|-----------|-----|------------|-------------|-------|-----|-------|
+| Hotspot Detection      | ✅  | ✅     | ✅      | ✅ |           |     |            |             |       |     |       |
+| Algae Bloom Analytics|     | ✅     |         | ✅ | ✅        |     |            |             |       |     |       |
+| Cleanup Missions       | ✅  | ✅     |         | ✅ |           |     |            |             |       |     | ✅    |
+| Citizen Reports        |     | ✅     | ✅      | ✅ |           | ✅  | ✅         | ✅          | ✅    |     |       |
+| AI Alerts              |     | ✅     | ✅      | ✅ |           |     |            |             | ✅    | ✅  |       |
+| Data Lake Insights     |     | ✅     |         | ✅ | ✅        |     |            |             |       |     |       |
+| Algae Lifecycle      |     |        | ✅      | ✅ | ✅        |     |            |             |       |     |       |
+| Global Impact          |     |        | ✅      | ✅ | ✅        |     |            |             |       |     |       |
+| Engage                 |     | ✅     |         | ✅ |           | ✅  |            |             |       | ✅  |       |
+
+The modular architecture allows seamless integration of various components, ensuring scalability and adaptability to different environmental challenges.
+
+## Challenges We Ran Into
+During development, we faced several challenges, including:
+- Ensuring data accuracy and reliability from distributed IoT sensors.
+- Integrating diverse AWS services smoothly to create a cohesive platform.
+- Designing an intuitive user interface that caters to users with varying levels of digital literacy.
+- Building trust and engagement within communities to encourage participation in reporting and monitoring.
+
+## Accomplishments That We're Proud Of
+We successfully developed a fully functional prototype that demonstrates real-time algae bloom detection and prediction capabilities. This is built by a SINGLE person, who has stayed on the river side during my childhood. Seeing a lot of Algae on Kauvery River motivated me to do this initiative. Additionally, we implemented accessibility features that make AquaPulse usable for a diverse audience.
+
+## What We Learned
+Throughout the project, we learned the importance of user feedback in shaping the platform's features and functionality. Collaborating with environmental experts and community members provided valuable insights that guided our design choices. We also gained expertise in leveraging AWS services for scalable and efficient solutions, enhancing our technical skills in cloud-native development.
+
+## What's Next for AquaPulse: Smart Algae Bloom Monitoring
+Moving forward, we plan to enhance AquaPulse by:
+- Incorporating more advanced predictive analytics and machine learning models.
+- Expanding our network of IoT sensors for broader coverage.
+- Increasing community engagement initiatives to foster participation.
+- Partnering with local governments and organizations to deploy AquaPulse in additional regions.
+- Exploring new features that address other environmental challenges, such as water quality monitoring and pollution detection.
+
+
 AquaPulse leverages AWS generative AI, IoT, and cloud services to deliver real-time monitoring, prediction, and response for harmful algae blooms, transforming environmental data into actionable insights that empower communities and protect marine life.
 
 ---
@@ -27,7 +79,7 @@ AquaPulse leverages AWS generative AI, IoT, and cloud services to deliver real-t
 
 ## System Architecture
 
-![AquaPulse Architecture](https://github.com/arvindmittursundararajan/aquapulse/blob/main/screenshots/arcc.png)
+![AquaPulse Architecture](https://github.com/arvindmittursundararajan/aquapulse/raw/main/screenshots/arcc.png)
 
 The AquaPulse system architecture is a comprehensive, cloud-native solution designed to monitor and respond to harmful algae blooms (HABs) by integrating IoT, AI, and cloud services across multiple layers:
 
@@ -61,7 +113,7 @@ This architecture exemplifies a robust, scalable, and intelligent system that ha
 
 ### **Core Generative AI & ML**
 - **Amazon Bedrock**: Foundation for real-time anomaly detection, root cause analysis, and generation of actionable recommendations. Powers explainable AI, multi-agent optimization, and natural language summaries across all operational and citizen-facing modules. 🤖
-- **Amazon SageMaker**: Drives advanced analytics, forecasting, and scenario modeling for microplastics, lifecycle analysis, and global impact. Enables ML-driven decision support and predictive insights. 📊
+- **Amazon SageMaker**: Drives advanced analytics, forecasting, and scenario modeling for algae bloom, lifecycle analysis, and global impact. Enables ML-driven decision support and predictive insights. 📊
 
 ### **Conversational & Multimodal AI**
 - **Amazon Lex**: Provides conversational AI for chatbots, enabling natural language citizen engagement, report submission, and information retrieval. 💬
@@ -72,7 +124,7 @@ This architecture exemplifies a robust, scalable, and intelligent system that ha
 - **AWS IoT Core**: Ingests real-time sensor data from distributed IoT devices, enabling live hotspot detection, predictive analytics, and automated response. 📡
 - **AWS Lambda**: Orchestrates event-driven processing, automation, and integration between AI, IoT, and data storage components. ⚙️
 - **Amazon S3**: Serves as the data lake for sensor data, reports, analytics outputs, and downloadable resources. 🗄️
-- **Amazon Rekognition**: Analyzes uploaded images for plastic waste, supporting multi-modal citizen reporting and automated validation. 🖼️
+- **Amazon Rekognition**: Analyzes uploaded images for algae , supporting multi-modal citizen reporting and automated validation. 🖼️
 - **Amazon SNS**: (If enabled) Delivers real-time notifications and alerts to stakeholders. 📣
 - **AWS IAM**: Manages secure, role-based access for all AWS resources and automation. 🔐
 - **Bedrock Agent (Multi-Agent AI)**: Coordinates complex, multi-step optimization and decision support workflows, including resource allocation, mission planning, and explainable recommendations. 🤝
@@ -113,7 +165,7 @@ This architecture exemplifies a robust, scalable, and intelligent system that ha
 
 ### 2. **Core Integration of Bedrock/SageMaker/Q**
 - Bedrock: AI-driven alerts, explainable recommendations, multi-agent optimization.
-- SageMaker: ML analytics for microplastics, lifecycle, and impact forecasting.
+- SageMaker: ML analytics for algae , lifecycle, and impact forecasting.
 
 ### 3. **Combining Generative AI with Next-Gen Connectivity**
 - IoT/5G sensor data is processed and analyzed by Bedrock/SageMaker in real time, enabling live detection and automated response.
@@ -125,7 +177,7 @@ This architecture exemplifies a robust, scalable, and intelligent system that ha
 - Environmental, societal, and operational metrics are tracked and surfaced in dashboards for transparent impact assessment.
 
 ### 6. **Societal Problem & Measurable Change**
-- Directly addresses plastic pollution, empowering communities and authorities with actionable intelligence and participatory tools.
+- Directly addresses algae , empowering communities and authorities with actionable intelligence and participatory tools.
 
 ### 7. **Clean, Intuitive, Accessible UI**
 - Minimalist, responsive design with multi-modal input and accessibility features.
@@ -144,22 +196,6 @@ This architecture exemplifies a robust, scalable, and intelligent system that ha
 
 ### 12. **Novelty vs. Existing Solutions**
 - Advances the state of the art by combining real-time IoT, generative AI, and participatory action, with explainable, actionable insights and equitable access.
-
----
-
-## Summary Table: AWS Service Mapping 📊
-
-| Modal/Screen           | IoT | Lambda | Bedrock | S3 | SageMaker | Lex | Transcribe | Rekognition | Polly | SNS | Agent |
-|------------------------|-----|--------|---------|----|-----------|-----|------------|-------------|-------|-----|-------|
-| Hotspot Detection      | ✅  | ✅     | ✅      | ✅ |           |     |            |             |       |     |       |
-| Microplastics Analytics|     | ✅     |         | ✅ | ✅        |     |            |             |       |     |       |
-| Cleanup Missions       | ✅  | ✅     |         | ✅ |           |     |            |             |       |     | ✅    |
-| Citizen Reports        |     | ✅     | ✅      | ✅ |           | ✅  | ✅         | ✅          | ✅    |     |       |
-| AI Alerts              |     | ✅     | ✅      | ✅ |           |     |            |             | ✅    | ✅  |       |
-| Data Lake Insights     |     | ✅     |         | ✅ | ✅        |     |            |             |       |     |       |
-| Plastic Lifecycle      |     |        | ✅      | ✅ | ✅        |     |            |             |       |     |       |
-| Global Impact          |     |        | ✅      | ✅ | ✅        |     |            |             |       |     |       |
-| Engage                 |     | ✅     |         | ✅ |           | ✅  |            |             |       | ✅  |       |
 
 ---
 
@@ -236,7 +272,7 @@ AquaPulse provides a comprehensive, production-grade platform for harmful algae 
 - **/api/delete-junk-services:** Delete all test/demo AWS resources.
 - **/api/citizen-reports:** Get all citizen reports.
 - **/api/engage-actions:** Get engagement actions and opportunities.
-- **/api/microplastics-analytics:** Get microalgae analytics data.
+- **/api/microalgae-analytics:** Get microalgae analytics data.
 - **/api/iam-roles:** List IAM roles.
 - **/api/create-iam-role:** Create IAM role.
 - **/api/sagemaker-models:** List SageMaker models.
@@ -245,7 +281,7 @@ AquaPulse provides a comprehensive, production-grade platform for harmful algae 
 - **/api/ai-alerts:** Get Bedrock-powered AI alerts.
 - **/api/cleanup-missions:** Get mitigation mission data.
 - **/api/data-lake-insights:** Get S3-powered data lake insights.
-- **/api/plastic-lifecycle:** Get algae bloom lifecycle data.
+- **/api/algae-lifecycle:** Get algae bloom lifecycle data.
 - **/api/citizen-reports-summary:** Get summary of citizen reports.
 - **/api/campaigns:** Get all engagement campaigns.
 
@@ -307,4 +343,5 @@ Moving forward, we plan to enhance AquaPulse by:
 - Increasing community engagement initiatives to foster participation. 🤗
 - Partnering with local governments and organizations to deploy AquaPulse in additional regions. 🏙️
 - Exploring new features that address other environmental challenges, such as water quality monitoring and pollution detection. 🌊
+
 
